@@ -17,7 +17,7 @@ typedef struct pipeline_t {
 
   void *data;
   size_t size, data_size;
-  void (*operations[4])(void *, size_t, size_t);
+  void (*operations[4])(void *, int, int);
   P_FLAG active_flags;
   
 } Pipeline;
@@ -29,7 +29,7 @@ Pipeline create_pipeline(void *data, size_t size, size_t data_size, P_FLAG flags
   size_t allocation_size = pipeline.size * pipeline.data_size;
   
   pipeline.data = malloc(allocation_size);
-  memcpy(pipeline.data, data, allocation_size);
+  memcpy(pipeline.data, data, sizeof(allocation_size));
   
   if(flags & P_MAP) pipeline.operations[0] = map_function;
   else pipeline.operations[0] = NULL;
@@ -51,9 +51,7 @@ int pipeline_destroy(Pipeline *pipeline){
     free(pipeline->data);
     pipeline->size = 0;
     pipeline->data_size=0;
-
-    for (int i = 0; i < 4; i++)
-      pipeline.operations[i] = NULL;
+    pipeline->operations = NULL;
     
     return 0;
   }
