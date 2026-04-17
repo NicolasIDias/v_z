@@ -22,6 +22,40 @@ typedef struct pipeline_t {
   
 } Pipeline;
 
+
+void map_function(void *data, size_t size, size_t data_size){
+  for(size_t i=0;i<size;i++){}
+}
+void reduce_function(void *data, size_t size, size_t data_size){
+  for(size_t i=0;i<size;i++){}
+}
+void sort_function(void *data, size_t size, size_t data_size){
+  for(size_t i=0;i<size;i++){
+    for(size_t j=i+1;j<size;j++){}
+  }
+}
+void filter_function(void *data, size_t size, size_t data_size){
+  for(size_t i=0;i<size;i++){}
+}
+
+void pipeline_register(Pipeline *pipeline, P_FLAG flags){
+  
+  for(size_t i=0;i<4;i++){
+    if(flags & P_MAP) pipeline->operations[i] = map_function;
+    else pipeline->operations[i] = NULL;
+
+    if(flags & P_REDUCE) pipeline->operations[i] = reduce_function;
+    else pipeline->operations[i] = NULL;
+
+    if(flags & P_SORT) pipeline->operations[i] = sort_function;
+    else pipeline->operations[i] = NULL;
+
+    if(flags & P_FILTER) pipeline->operations[i] = filter_function;
+    else pipeline->operations[i] = NULL;  
+  }
+ 
+}
+
 Pipeline create_pipeline(void *data, size_t size, size_t data_size, P_FLAG flags){
 
   Pipeline pipeline = { .size = size, .data_size = data_size, .active_flags = flags };
@@ -30,19 +64,9 @@ Pipeline create_pipeline(void *data, size_t size, size_t data_size, P_FLAG flags
   
   pipeline.data = malloc(allocation_size);
   memcpy(pipeline.data, data, allocation_size);
-  
-  if(flags & P_MAP) pipeline.operations[0] = map_function;
-  else pipeline.operations[0] = NULL;
 
-  if(flags & P_REDUCE) pipeline.operations[1] = reduce_function;
-  else pipeline.operations[1] = NULL;
+  pipeline_register(&pipeline, flags); 
   
-  if(flags & P_SORT) pipeline.operations[2] = sort_function;
-  else pipeline.operations[2] = NULL;
-  
-  if(flags & P_FILTER) pipeline.operations[3] = filter_function;
-  else pipeline.operations[3] = NULL;
-
   return pipeline;
 }
 
@@ -53,7 +77,7 @@ int pipeline_destroy(Pipeline *pipeline){
     pipeline->data_size=0;
 
     for (int i = 0; i < 4; i++)
-      pipeline.operations[i] = NULL;
+      pipeline->operations[i] = NULL;
     
     return 0;
   }
@@ -61,8 +85,8 @@ int pipeline_destroy(Pipeline *pipeline){
   return 1;
 }
 
-void pipeline_register(Pipeline *pipeline, P_FLAG flag, void (*operation)(void *, size_t, size_t)){
-}
+
+
 
 void pipeline_run(Pipeline *pipeline){
   
@@ -70,6 +94,9 @@ void pipeline_run(Pipeline *pipeline){
 
 int main(void){
 
+  int xs[5] = { 1, 2, 3, 4, 5 };
+  
+  Pipeline t = create_pipeline(xs, sizeof(xs)/sizeof(xs[0]), sizeof(xs[0]), P_FILTER | P_SORT);
   
   
   return 0;
